@@ -1,9 +1,9 @@
-# Configuration definition for thorn Boundary
+# Configuration definition for thorn Boundary2
 # $Header$
 
 # This will disappear once function aliasing has requires
 
-PROVIDES Boundary
+PROVIDES Boundary2
 {
   SCRIPT
   LANG

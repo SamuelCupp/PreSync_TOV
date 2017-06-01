@@ -1,4 +1,4 @@
-# Schedule definitions for thorn Boundary
+# Schedule definitions for thorn Boundary2
 # $Header$
 
 schedule Boundary_Check at CCTK_PARAMCHECK
