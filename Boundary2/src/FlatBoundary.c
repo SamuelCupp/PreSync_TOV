@@ -88,7 +88,7 @@ static int OldApplyBndFlat(const cGH *GH, int stencil_dir,
                -22 wrong size boundary width array in table
    @endreturndesc
 @@*/
-CCTK_INT BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
+void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                  CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
   int i, j, k, gi, gdim, max_gdim, err, retval;
 
@@ -96,7 +96,6 @@ CCTK_INT BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
   int dir;                 /* direction in which to apply bc */
 
-  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -145,29 +144,23 @@ CCTK_INT BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return -21;
+        return;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return -22;
+        return;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
         width_alldirs[k] = widths[i];
       }
     }
-
-    /* Apply the boundary condition */
-    if ((retval = ApplyBndFlat(GH, 0, width_alldirs, dir, vars[i], j)) < 0) {
-      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndFlat() returned %d", retval);
-    }
   }
   free(width_alldirs);
 
-  return retval;
+  return;
 }
 
 /* prototypes for external C routines are declared in header Boundary.h

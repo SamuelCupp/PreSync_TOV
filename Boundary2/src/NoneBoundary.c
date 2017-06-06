@@ -80,7 +80,7 @@ CCTK_FILEVERSION(CactusBase_Boundary_NoneBoundary_c);
    @endreturndesc
 @@*/
 
-CCTK_INT BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
+void BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
                  CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *table_handles) {
 #ifdef DEBUG
   printf("BndNone(): got passed GH=%p, num_vars=%d, var_indices[0]=%d, "
@@ -96,5 +96,5 @@ CCTK_INT BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
   widths = widths;
   table_handles = table_handles;
 
-  return 0;
+  return;
 }

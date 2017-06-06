@@ -22,18 +22,18 @@ typedef CCTK_INT (*phys_bc_fn_ptr)(CCTK_POINTER_TO_CONST, const CCTK_INT,
                                    const CCTK_INT *, const CCTK_INT *);
 
 /* check boundary withd and abort if unlikely large (>100 points) */
-void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
-                          const CCTK_INT *boundary_widths, const char *bcname);
+//void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
+//                          const CCTK_INT *boundary_widths, const char *bcname);
 
 /* prototype for routine registed as providing 'None' boundary condition */
-CCTK_INT BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                  CCTK_INT *faces, CCTK_INT *boundary_widths,
                  CCTK_INT *table_handle);
 
 /* Scalar boundaries */
 
 /* prototype for routine registed as providing 'Scalar' boundary condition */
-CCTK_INT BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                    CCTK_INT *faces, CCTK_INT *boundary_widths,
                    CCTK_INT *table_handle);
 
@@ -56,7 +56,7 @@ int BndScalarVN(const cGH *GH, const int *stencil, CCTK_REAL var0,
 /* Copying boundaries */
 
 /* prototype for routine registed as providing 'Copy' boundary condition */
-CCTK_INT BndCopy(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndCopy(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                  CCTK_INT *faces, CCTK_INT *boundary_widths,
                  CCTK_INT *table_handle);
 
@@ -79,7 +79,7 @@ int BndCopyVN(const cGH *GH, const int *stencil, const char *vname_to,
 /* Static boundaries  */
 
 /* prototype for routine registed as providing 'Static' boundary condition */
-CCTK_INT BndStatic(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndStatic(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                    CCTK_INT *faces, CCTK_INT *boundary_widths,
                    CCTK_INT *table_handle);
 
@@ -97,7 +97,7 @@ int BndStaticVN(const cGH *GH, const int *stencil, const char *vname);
 
 /* prototype for routine registed as providing 'Radiative' boundary conditions
  */
-CCTK_INT BndRadiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndRadiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                       CCTK_INT *faces, CCTK_INT *boundary_widths,
                       CCTK_INT *table_handle);
 
@@ -124,7 +124,7 @@ int BndRadiativeVN(const cGH *GH, const int *stencil, CCTK_REAL var0,
 /* Robin boundaries */
 
 /* prototype for routine registed as providing 'Robin' boundary condition */
-CCTK_INT BndRobin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndRobin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                   CCTK_INT *faces, CCTK_INT *boundary_widths,
                   CCTK_INT *table_handle);
 
@@ -140,7 +140,7 @@ int BndRobinVN(const cGH *GH, const int *stencil, CCTK_REAL finf, int npow,
 /* Flat boundaries */
 
 /* prototype for routine registed as providing 'Flat' boundary condition */
-CCTK_INT BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
+void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indicies,
                  CCTK_INT *faces, CCTK_INT *boundary_widths,
                  CCTK_INT *table_handle);
 

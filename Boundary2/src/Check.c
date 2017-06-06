@@ -24,7 +24,6 @@
 
 /* the rcs ID and its dummy function to use it */
 static const char *rcsid = "$Header$";
-CCTK_FILEVERSION(CactusBase_Boundary_Check_c);
 
 /* Maximum dimension for grid variables to be selected for BC.
    Restriction is representation of set of faces in a 32 bit signed integer. */
@@ -60,7 +59,7 @@ CCTK_FILEVERSION(CactusBase_Boundary_Check_c);
    @endreturndesc
 @@*/
 
-void Boundary_Check(CCTK_ARGUMENTS) {
+void Boundary_Check2(CCTK_ARGUMENTS) {
   DECLARE_CCTK_ARGUMENTS;
 
   if (CCTK_MaxDim() > 15) {
@@ -117,7 +116,7 @@ void Boundary_Check(CCTK_ARGUMENTS) {
               aborts on error
   @endreturndesc
 @@*/
-void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
+/*void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
                           const CCTK_INT *boundary_widths, const char *bcname) {
   for (int i = 0; i < 2 * dim; i++) {
     // due to the special meaning of width<0 in Boundary this does not catch
@@ -136,4 +135,4 @@ void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
       free(fullname);
     }
   }
-}
+}*/
