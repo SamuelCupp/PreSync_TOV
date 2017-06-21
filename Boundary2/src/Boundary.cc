@@ -66,16 +66,4 @@ void presync_registerboundary(CCTK_ARGUMENTS)
   if (register_none) {
     Carpet_RegisterPhysicalBC(cctkGH, BndNone, "None",1);
   }
-
-  int w = 1;
-
-  Carpet_SelectGroupForBC(cctkGH,
-    CCTK_ALL_FACES, w,
-   -1 /* no table */, "PresyncWave::evo_vars",
-   "zero");
-
-  Carpet_SelectGroupForBC(cctkGH,
-    CCTK_ALL_FACES, w,
-   -1 /* no table */, "PresyncWave::rhs_vars",
-   "zero");
 }
