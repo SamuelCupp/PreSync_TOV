@@ -35,7 +35,6 @@ void presync_registerboundary(CCTK_ARGUMENTS)
   _DECLARE_CCTK_ARGUMENTS
   DECLARE_CCTK_PARAMETERS
   int err;
-//  CCTK_INT group, rhs;
 
   std::cout << "Register Boundary Conditions" << std::endl;
 

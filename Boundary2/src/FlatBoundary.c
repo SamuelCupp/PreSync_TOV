@@ -106,7 +106,7 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     /* Since GFs are allowed to have different staggering, the best we
        can do is find variables of the same group which are selected
        for identical bcs.  If all GFs had the same staggering then we
-       could groups many GFs together. */
+       could group many GFs together. */
     gi = CCTK_GroupIndexFromVarI(vars[i]);
     while (i + j < num_vars && vars[i + j] == vars[i] + j &&
            CCTK_GroupIndexFromVarI(vars[i + j]) == gi &&
@@ -158,6 +158,7 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       }
     }
   }
+err = ApplyBndFlat(GH,0, width_alldirs, dir, vars[0], num_vars);
   free(width_alldirs);
 
   return;

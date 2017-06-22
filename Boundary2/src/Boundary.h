@@ -21,7 +21,7 @@ typedef CCTK_INT (*phys_bc_fn_ptr)(CCTK_POINTER_TO_CONST, const CCTK_INT,
                                    const CCTK_INT *, const CCTK_INT *,
                                    const CCTK_INT *, const CCTK_INT *);
 
-/* check boundary withd and abort if unlikely large (>100 points) */
+/* check boundary width and abort if unlikely large (>100 points) */
 //void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
 //                          const CCTK_INT *boundary_widths, const char *bcname);
 

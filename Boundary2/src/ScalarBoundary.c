@@ -174,6 +174,7 @@ void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       }
     }
   }
+err = ApplyBndScalar(GH,0, width_alldirs, dir, vars[0], num_vars);
   free(width_alldirs);
 
   return;

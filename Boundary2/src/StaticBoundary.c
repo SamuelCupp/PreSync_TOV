@@ -155,6 +155,7 @@ void BndStatic(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       }
     }
   }
+err = ApplyBndStatic(GH,0, width_alldirs, dir, vars[0], num_vars);
 #ifdef DEBUG
   printf("BndStatic(): returning %d\n", retval);
 #endif
