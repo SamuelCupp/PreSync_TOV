@@ -168,21 +168,30 @@ void BndRobin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return;
+        return; //-21
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return;
+        return; //-22
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
         width_alldirs[k] = widths[i];
       }
     }
+
+    /* Apply the boundary condition */
+    if ((err = ApplyBndRobin(GH, width_alldirs, finf, npow, vars[i], j)) <
+        0) {
+      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+                 "ApplyBndRobin() returned %d", err);
+    }
   }
-//err = ApplyBndRobin(GH, width_alldirs, vars[0], num_vars);
+#ifdef DEBUG
+  printf("BndRobin(): returning %d\n", err);
+#endif
   free(width_alldirs);
 
   return;

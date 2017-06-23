@@ -157,8 +157,18 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
         width_alldirs[k] = widths[i];
       }
     }
+
+    /* Apply the boundary condition */
+    if ((err = ApplyBndFlat(GH,0, width_alldirs, dir, vars[i]
+                                    , j)) < 0) {
+      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+                 "ApplyBndScalar() returned %d", err);
+    }
   }
-err = ApplyBndFlat(GH,0, width_alldirs, dir, vars[0], num_vars);
+#ifdef DEBUG
+  printf("BndFlat(): returning %d\n", err);
+#endif
+
   free(width_alldirs);
 
   return;

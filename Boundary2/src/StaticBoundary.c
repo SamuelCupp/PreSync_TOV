@@ -154,11 +154,18 @@ void BndStatic(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
         width_alldirs[k] = widths[i];
       }
     }
+
+    /* Apply the boundary condition */
+    if ((err = ApplyBndStatic(GH,0, width_alldirs, dir, vars[i]
+                                    , j)) < 0) {
+      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+                 "ApplyBndStatic() returned %d", err);
+    }
   }
-err = ApplyBndStatic(GH,0, width_alldirs, dir, vars[0], num_vars);
 #ifdef DEBUG
-  printf("BndStatic(): returning %d\n", retval);
+  printf("BndStatic(): returning %d\n", err);
 #endif
+
   free(width_alldirs);
 
   return;

@@ -141,7 +141,7 @@ void BndCopy(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                  "conditions for %s.  Name or index of variable to copy from "
                  "must be provided via key \"COPY_FROM\".  Aborting.",
                  CCTK_VarName(vars[i]));
-      return;
+      return; //-11
     } else if (err == 1) {
       if (value_type == CCTK_VARIABLE_STRING) {
         copy_from_name = malloc(value_size * sizeof(char));
@@ -161,7 +161,7 @@ void BndCopy(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                  "No key \"COPY_FROM\" provided in table.  Please enter the "
                  "name or index of variable to copy from into the table "
                  "under this key.  Aborting.");
-      return;
+      return; //-12
     }
 
     /* Determine boundary width on all faces */
@@ -183,21 +183,31 @@ void BndCopy(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return;
+        return; //-21
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return;
+        return; //-22
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
         width_alldirs[k] = widths[i];
       }
     }
+
+    /* Apply the boundary condition */
+    if ((err = ApplyBndCopy(GH, 0, width_alldirs, dir, vars[i], copy_from,
+                               j)) < 0) {
+      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+                 "ApplyBndCopy() returned %d", err);
+    }
   }
-//err = ApplyBndCopy(GH,0, width_alldirs, dir, vars[0], num_vars);
+#ifdef DEBUG
+  printf("BndCopy(): returning %d\n", err);
+#endif
+
   free(width_alldirs);
 
   return;

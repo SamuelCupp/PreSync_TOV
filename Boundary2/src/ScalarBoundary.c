@@ -90,14 +90,13 @@ static int OldApplyBndScalar(const cGH *GH, int stencil_dir,
 @@*/
 void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, gdim, max_gdim, err, retval;
+  int i, j, k, gi, gdim, max_gdim, err;
 
   /* variables to pass to ApplyBndScalar */
   CCTK_INT *width_alldirs; /* width of stencil in all directions */
   int dir;                 /* direction in which to apply bc */
   CCTK_REAL scalar;
 
-  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -177,15 +176,19 @@ void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((retval = ApplyBndScalar(GH, 0, width_alldirs, dir, faces[i], scalar,
+    if ((err = ApplyBndScalar(GH, 0, width_alldirs, dir, faces[i], scalar,
                                  vars[i], j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndScalar() returned %d", retval);
+                 "ApplyBndScalar() returned %d", err);
     }
   }
+#ifdef DEBUG
+  printf("BndScalar(): returning %d\n", err);
+#endif
+
   free(width_alldirs);
 
-  return; //retval
+  return;
 }
 
 /* prototypes for external C routines are declared in header Boundary.h
