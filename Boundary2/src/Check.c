@@ -116,7 +116,8 @@ void Boundary_Check2(CCTK_ARGUMENTS) {
               aborts on error
   @endreturndesc
 @@*/
-/*void BndSanityCheckWidths(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
+/*
+void BndSanityCheckWidths2(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
                           const CCTK_INT *boundary_widths, const char *bcname) {
   for (int i = 0; i < 2 * dim; i++) {
     // due to the special meaning of width<0 in Boundary this does not catch

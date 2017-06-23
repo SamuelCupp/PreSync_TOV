@@ -141,13 +141,13 @@ void BndStatic(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_FullName(vars[i]));
-        return;
+        return; //-21
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_FullName(vars[i]), err, 2 * gdim);
-        return;
+        return; //-22
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {

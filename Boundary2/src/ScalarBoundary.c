@@ -28,8 +28,9 @@
 static const char *rcsid = "$Header$";
 CCTK_FILEVERSION(CactusBase_Boundary_ScalarBoundary_c);
 
-static int ApplyBndScalar(const cGH *GH, CCTK_INT stencil_dir,
-                          const CCTK_INT *stencil_alldirs, int dir,
+static int ApplyBndScalar(const cGH *GH,
+                          CCTK_INT width_dir, const CCTK_INT *in_widths,
+                          int dir, CCTK_INT faces,
                           CCTK_REAL scalar, int first_var, int num_vars);
 static int OldApplyBndScalar(const cGH *GH, int stencil_dir,
                              const int *stencil_alldirs, int dir,
@@ -89,13 +90,14 @@ static int OldApplyBndScalar(const cGH *GH, int stencil_dir,
 @@*/
 void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, gdim, max_gdim, err;
+  int i, j, k, gi, gdim, max_gdim, err, retval;
 
   /* variables to pass to ApplyBndScalar */
   CCTK_INT *width_alldirs; /* width of stencil in all directions */
   int dir;                 /* direction in which to apply bc */
   CCTK_REAL scalar;
 
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -160,24 +162,30 @@ void BndScalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return;
+        return; //-21
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return;
+        return; //-22
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
         width_alldirs[k] = widths[i];
       }
     }
+
+    /* Apply the boundary condition */
+    if ((retval = ApplyBndScalar(GH, 0, width_alldirs, dir, faces[i], scalar,
+                                 vars[i], j)) < 0) {
+      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+                 "ApplyBndScalar() returned %d", retval);
+    }
   }
-err = ApplyBndScalar(GH,0, width_alldirs, dir, vars[0], num_vars);
   free(width_alldirs);
 
-  return;
+  return; //retval
 }
 
 /* prototypes for external C routines are declared in header Boundary.h
@@ -261,7 +269,8 @@ int BndScalarDirVI(const cGH *GH, int stencil_size, int dir, CCTK_REAL scalar,
   int retval;
 
   if (vi >= 0 && vi < CCTK_NumVars()) {
-    retval = ApplyBndScalar(GH, stencil_size, NULL, dir, scalar, vi, 1);
+    retval = ApplyBndScalar(GH, stencil_size, NULL, dir, CCTK_ALL_FACES, scalar,
+                            vi, 1);
   } else {
     CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
                "Invalid variable index %d in BndScalarDirVI", vi);
@@ -384,8 +393,8 @@ int BndScalarDirGI(const cGH *GH, int stencil_size, int dir, CCTK_REAL scalar,
 
   first_vi = CCTK_FirstVarIndexI(gi);
   if (first_vi >= 0) {
-    retval = ApplyBndScalar(GH, stencil_size, NULL, dir, scalar, first_vi,
-                            CCTK_NumVarsInGroupI(gi));
+    retval = ApplyBndScalar(GH, stencil_size, NULL, dir, CCTK_ALL_FACES, scalar,
+                            first_vi, CCTK_NumVarsInGroupI(gi));
   } else {
     CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
                "Invalid group index %d in BndScalarDirGI", gi);
@@ -892,9 +901,10 @@ void CCTK_FCALL
               -4 if variable type is not supported
   @endreturndesc
 @@*/
-static int ApplyBndScalar(const cGH *GH, CCTK_INT width_dir,
-                          const CCTK_INT *in_widths, int dir, CCTK_REAL scalar,
-                          int first_var, int num_vars) {
+static int ApplyBndScalar(const cGH *GH,
+                          CCTK_INT width_dir, const CCTK_INT *in_widths,
+                          int dir, CCTK_INT faces,
+                          CCTK_REAL scalar, int first_var, int num_vars) {
   int ierr;
   int i, j, k;
   int gindex, gdim;
@@ -969,7 +979,7 @@ static int ApplyBndScalar(const cGH *GH, CCTK_INT width_dir,
        + have enough grid points
     */
     for (i = 0; i < 2 * gdim; i++) {
-      doBC[i] = is_physical[i];
+      doBC[i] = is_physical[i] && (faces == CCTK_ALL_FACES || (faces & (1<<i)));
     }
     for (i = 0; i < gdim; i++) {
       ash[i] = GH->cctk_ash[i];
@@ -1140,8 +1150,8 @@ static int OldApplyBndScalar(const cGH *GH, int stencil_dir,
   }
 
   /* Call ApplyBnd... with new boundary width array */
-  retval = ApplyBndScalar(GH, stencil_dir, boundary_widths, dir, scalar,
-                          first_var, num_vars);
+  retval = ApplyBndScalar(GH, stencil_dir, boundary_widths, dir, CCTK_ALL_FACES,
+                          scalar, first_var, num_vars);
 
   free(boundary_widths);
   return retval;

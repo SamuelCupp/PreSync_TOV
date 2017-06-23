@@ -258,7 +258,7 @@ void BndRadiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       }
     }
   }
-err = ApplyBndRadiative(GH,0, width_alldirs, dir, vars[0], num_vars);
+//err = ApplyBndRadiative(GH,0, width_alldirs, dir, vars[0], num_vars);
   free(width_alldirs);
 
   return;
