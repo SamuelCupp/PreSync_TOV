@@ -1,2 +1,6 @@
 # PreSync-TOV
 This repository implements PreSync with the TOV example from the Einstein Toolkit. It is currently in progress.
+
+Included is a new Boundary thorn. It is currently labeled Boundary2 to prevent compilation conflicts,
+as it is not backwards compatible in its current form. Currently, essential thorns require Boundary, so both
+must be included in the thornlist. However, future changes to these thorns should remove this unnecessary requirement.
