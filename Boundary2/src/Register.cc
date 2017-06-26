@@ -38,30 +38,30 @@ void presync_registerboundary(CCTK_ARGUMENTS)
   std::cout << "Register Boundary Conditions" << std::endl;
 
   if (register_scalar) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndScalar, "Scalar",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndScalar, "scalar",1);
   }
 
   if (register_flat) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndFlat, "Flat",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndFlat, "flat",1);
   }
 
   if (register_radiation) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndRadiative, "Radiation",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndRadiative, "radiation",1);
   }
 
   if (register_copy) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndCopy, "Copy",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndCopy, "copy",1);
   }
 
   if (register_robin) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndRobin, "Robin",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndRobin, "robin",1);
   }
 
   if (register_static) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndStatic, "Static",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndStatic, "static",1);
   }
 
   if (register_none) {
-    Carpet_RegisterPhysicalBC(cctkGH, BndNone, "None",1);
+    Carpet_RegisterPhysicalBC(cctkGH, BndNone, "none",1);
   }
 }

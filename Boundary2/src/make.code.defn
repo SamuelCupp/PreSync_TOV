@@ -9,5 +9,5 @@ SRCS = ScalarBoundary.c\
        RadiationBoundary.c\
        RobinBoundary.c\
        NoneBoundary.c\
-       Boundary.cc\
+       Register.cc\
        Check.c
