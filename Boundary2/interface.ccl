@@ -5,7 +5,13 @@ implements: boundary2
 
 INCLUDES HEADER: Boundary.h in Boundary.h
 
-# Implementation of new boundary spec:
+CCTK_INT FUNCTION Boundary_SelectedGVs(CCTK_POINTER_TO_CONST IN GH, \
+  CCTK_INT IN array_size, CCTK_INT ARRAY OUT var_indicies, \
+  CCTK_INT ARRAY OUT faces, CCTK_INT ARRAY OUT boundary_widths, \
+  CCTK_INT ARRAY OUT table_handles, CCTK_STRING IN bc_name)
+PROVIDES FUNCTION Boundary_SelectedGVs WITH SelectedGVs \
+  LANGUAGE C
+
 
 CCTK_INT FUNCTION \
     SymmetryTableHandleForGrid (CCTK_POINTER_TO_CONST IN cctkGH)

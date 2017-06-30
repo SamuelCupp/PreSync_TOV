@@ -59,7 +59,7 @@ static const char *rcsid = "$Header$";
    @endreturndesc
 @@*/
 
-void Boundary_Check2(CCTK_ARGUMENTS) {
+void Boundary2_Check(CCTK_ARGUMENTS) {
   DECLARE_CCTK_ARGUMENTS;
 
   if (CCTK_MaxDim() > 15) {

@@ -30,7 +30,7 @@ int Carpet_SelectGroupForBC(
     const char *bc_name);
 
 extern "C"
-void presync_registerboundary(CCTK_ARGUMENTS)
+void Boundary2_RegisterBCs(CCTK_ARGUMENTS)
 {
   _DECLARE_CCTK_ARGUMENTS
   DECLARE_CCTK_PARAMETERS

@@ -1,12 +1,12 @@
 # Schedule definitions for thorn Boundary2
 # $Header$
 
-schedule Boundary_Check2 at CCTK_PARAMCHECK
+schedule Boundary2_Check at CCTK_PARAMCHECK
 {
   LANG: C
 } "Check dimension of grid variables"
 
-schedule presync_registerboundary at CCTK_INITIAL
+schedule Boundary2_RegisterBCs at CCTK_INITIAL
 {
   LANG: C
   OPTIONS: global
