@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "Boundary.h"
+#include "Boundary2.h"
 
 /* the rcs ID and its dummy function to use it */
 static const char *rcsid = "$Header$";
@@ -116,7 +116,7 @@ void Boundary2_Check(CCTK_ARGUMENTS) {
               aborts on error
   @endreturndesc
 @@*/
-/*
+
 void BndSanityCheckWidths2(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
                           const CCTK_INT *boundary_widths, const char *bcname) {
   for (int i = 0; i < 2 * dim; i++) {
@@ -136,4 +136,4 @@ void BndSanityCheckWidths2(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
       free(fullname);
     }
   }
-}*/
+}

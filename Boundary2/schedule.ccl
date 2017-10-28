@@ -6,8 +6,20 @@ schedule Boundary2_Check at CCTK_PARAMCHECK
   LANG: C
 } "Check dimension of grid variables"
 
-schedule Boundary2_RegisterBCs at CCTK_INITIAL
+schedule Boundary2_RegisterBCs in Boundary2_Registration
 {
   LANG: C
   OPTIONS: global
 } "Register boundary conditions that this thorn provides"
+
+schedule GROUP Boundary2_Registration at CCTK_INITIAL
+{
+  LANG: C
+  OPTIONS: global
+} "Group for functions which register boundary conditions."
+
+schedule GROUP Boundary2_Selection at CCTK_INITIAL AFTER Boundary2_Registration
+{
+  LANG: C
+  OPTIONS: global
+} "Group for functions which select BCs for variables and groups."

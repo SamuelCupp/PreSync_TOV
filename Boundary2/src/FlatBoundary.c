@@ -23,19 +23,11 @@
 #include "util_ErrorCodes.h"
 #include "cctk_Parameters.h"
 #include "cctk_FortranString.h"
-
-#include "Boundary.h"
-
-/* the rcs ID and its dummy function to use it */
-static const char *rcsid = "$Header$";
-CCTK_FILEVERSION(CactusBase_Boundary_FlatBoundary_c);
+#include "Boundary2.h"
 
 static int ApplyBndFlat(const cGH *GH, CCTK_INT stencil_dir,
                         const CCTK_INT *stencil_alldirs, int dir, int first_var,
                         int num_vars);
-static int OldApplyBndFlat(const cGH *GH, int stencil_dir,
-                           const int *stencil_alldirs, int dir, int first_var,
-                           int num_vars);
 
 /********************************************************************
  ********************    External Routines   ************************
@@ -88,10 +80,10 @@ static int OldApplyBndFlat(const cGH *GH, int stencil_dir,
                -22 wrong size boundary width array in table
    @endreturndesc
 @@*/
-void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
-                 CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
+void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+                 CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *table_handles) {
   int i, j, k, gi, gdim, max_gdim, err, retval;
-
+  
   /* variables to pass to ApplyBndFlat */
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
   int dir;                 /* direction in which to apply bc */
@@ -107,10 +99,10 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
        can do is find variables of the same group which are selected
        for identical bcs.  If all GFs had the same staggering then we
        could group many GFs together. */
-    gi = CCTK_GroupIndexFromVarI(vars[i]);
-    while (i + j < num_vars && vars[i + j] == vars[i] + j &&
-           CCTK_GroupIndexFromVarI(vars[i + j]) == gi &&
-           tables[i + j] == tables[i] && faces[i + j] == faces[i] &&
+    gi = CCTK_GroupIndexFromVarI(var_indices[i]);
+    while (i + j < num_vars && var_indices[i + j] == var_indices[i] + j &&
+           CCTK_GroupIndexFromVarI(var_indices[i + j]) == gi &&
+           table_handles[i + j] == table_handles[i] && faces[i + j] == faces[i] &&
            widths[i + j] == widths[i]) {
       ++j;
     }
@@ -121,7 +113,7 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                  "Faces specification %d for Flat boundary conditions on "
                  "%s is not implemented yet.  "
                  "Applying Flat bcs to all (external) faces.",
-                 (int)faces[i], CCTK_VarName(vars[i]));
+                 (int)faces[i], CCTK_VarName(var_indices[i]));
     }
     dir = 0; /* apply bc to all faces */
 
@@ -137,19 +129,19 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     /* fill it with values, either from table or the boundary_width
        parameter */
     if (widths[i] < 0) {
-      err = Util_TableGetIntArray(tables[i], gdim, width_alldirs,
+      err = Util_TableGetIntArray(table_handles[i], gdim, width_alldirs,
                                   "BOUNDARY_WIDTH");
       if (err < 0) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Error %d when reading boundary width array from table "
                    "for %s",
-                   err, CCTK_VarName(vars[i]));
+                   err, CCTK_VarName(var_indices[i]));
         return;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
-                   CCTK_VarName(vars[i]), err, 2 * gdim);
+                   CCTK_VarName(var_indices[i]), err, 2 * gdim);
         return;
       }
     } else {
@@ -159,7 +151,7 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndFlat(GH,0, width_alldirs, dir, vars[i]
+    if ((err = ApplyBndFlat(cctkGH,0, width_alldirs, dir, var_indices[i]
                                     , j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "ApplyBndScalar() returned %d", err);
@@ -172,481 +164,6 @@ void BndFlat(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
   free(width_alldirs);
 
   return;
-}
-
-/* prototypes for external C routines are declared in header Boundary.h
-   here only follow the fortran wrapper prototypes */
-void CCTK_FCALL CCTK_FNAME(BndFlatDirGI)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, const int *gi);
-void CCTK_FCALL CCTK_FNAME(BndFlatGI)(int *ierr, const cGH **GH,
-                                      const int *stencil, const int *gi);
-void CCTK_FCALL CCTK_FNAME(BndFlatDirGN)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, ONE_FORTSTRING_ARG);
-void CCTK_FCALL CCTK_FNAME(BndFlatGN)(int *ierr, const cGH **GH,
-                                      const int *stencil, ONE_FORTSTRING_ARG);
-void CCTK_FCALL CCTK_FNAME(BndFlatDirVI)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, const int *vi);
-void CCTK_FCALL CCTK_FNAME(BndFlatVI)(int *ierr, const cGH **GH,
-                                      const int *stencil, const int *vi);
-void CCTK_FCALL CCTK_FNAME(BndFlatDirVN)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, ONE_FORTSTRING_ARG);
-void CCTK_FCALL CCTK_FNAME(BndFlatVN)(int *ierr, const cGH **GH,
-                                      const int *stencil, ONE_FORTSTRING_ARG);
-
-/********************************************************************
- ********************    Internal Routines   ************************
- ********************************************************************/
-
-/*@@
-   @routine    BndFlatDirGI
-   @date       Sun Jan 21 2001
-   @author     Gabrielle Allen
-   @desc
-               Apply flat boundary conditions by group index in given direction
-   @enddesc
-   @calls      ApplyBndFlat
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil_size
-   @vdesc      stencil size in this direction
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        dir
-   @vdesc      direction to apply boundaries
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        gi
-   @vdesc      index of group to apply boundaries to
-   @vtype      int
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine ApplyBndFlat <BR>
-               -1 if invalid group index was given
-   @endreturndesc
-@@*/
-int BndFlatDirGI(const cGH *GH, int stencil_size, int dir, int gi) {
-  int first_vi, retval;
-
-  first_vi = CCTK_FirstVarIndexI(gi);
-  if (first_vi >= 0) {
-    retval = ApplyBndFlat(GH, stencil_size, NULL, dir, first_vi,
-                          CCTK_NumVarsInGroupI(gi));
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid group index %d in BndFlatDirGI", gi);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatDirGI)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, const int *gi) {
-  *ierr = BndFlatDirGI(*GH, *stencil_size, *dir, *gi);
-}
-
-/*@@
-   @routine    BndFlatGI
-   @date       Thu Mar  2 11:11:40 2000
-   @author     Gerd Lanfermann
-   @desc
-               Apply flat boundary conditions by group index
-   @enddesc
-   @calls      ApplyBndFlat
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil
-   @vdesc      stencil width
-   @vtype      int [ dimension of group ]
-   @vio        in
-   @endvar
-   @var        gi
-   @vdesc      index of group to apply boundaries to
-   @vtype      int
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine ApplyBndFlat <BR>
-               -1 if invalid group index was given
-   @endreturndesc
-@@*/
-int BndFlatGI(const cGH *GH, const int *stencil, int gi) {
-  int first_vi, retval;
-
-  first_vi = CCTK_FirstVarIndexI(gi);
-  if (first_vi >= 0) {
-    retval =
-        OldApplyBndFlat(GH, -1, stencil, 0, first_vi, CCTK_NumVarsInGroupI(gi));
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid group index %d in BndFlatGI", gi);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatGI)(int *ierr, const cGH **GH,
-                                      const int *stencil, const int *gi) {
-  *ierr = BndFlatGI(*GH, stencil, *gi);
-}
-
-/* ===================================================================== */
-
-/*@@
-   @routine    BndFlatDirGN
-   @date       Sun Jan 21 2001
-   @author     Gabrielle Allen
-   @desc
-               Apply flat boundary conditions by group name in given direction
-   @enddesc
-   @calls      BndFlatDirGI
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil_size
-   @vdesc      stencil size in this direction
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        dir
-   @vdesc      direction to apply boundaries
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        gn
-   @vdesc      name of group to apply boundaries to
-   @vtype      const char *
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine BndFlatDirGI <BR>
-               -1 if invalid group name was given
-   @endreturndesc
-@@*/
-int BndFlatDirGN(const cGH *GH, int stencil_size, int dir, const char *gn) {
-  int gi, retval;
-
-  gi = CCTK_GroupIndex(gn);
-  if (gi >= 0) {
-    retval = BndFlatDirGI(GH, stencil_size, dir, gi);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid group name '%s' in BndFlatDirGN", gn);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatDirGN)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, ONE_FORTSTRING_ARG) {
-  ONE_FORTSTRING_CREATE(gn)
-  *ierr = BndFlatDirGN(*GH, *stencil_size, *dir, gn);
-  free(gn);
-}
-
-/*@@
-   @routine    BndFlatGN
-   @date       Thu Mar  2 11:11:40 2000
-   @author     Gerd Lanfermann
-   @desc
-               Apply flat boundary conditions by group name
-   @enddesc
-   @calls      BndFlatGI
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil
-   @vdesc      stencil width
-   @vtype      int [ dimension of group ]
-   @vio        in
-   @endvar
-   @var        gn
-   @vdesc      name of group to apply boundaries to
-   @vtype      const char *
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine BndFlatGI <BR>
-               -1 if invalid group name was given
-   @endreturndesc
-@@*/
-int BndFlatGN(const cGH *GH, const int *stencil, const char *gn) {
-  int gi, retval;
-
-  gi = CCTK_GroupIndex(gn);
-  if (gi >= 0) {
-    retval = BndFlatGI(GH, stencil, gi);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid group name '%s' in BndFlatGN", gn);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatGN)(int *ierr, const cGH **GH,
-                                      const int *stencil, ONE_FORTSTRING_ARG) {
-  ONE_FORTSTRING_CREATE(gn)
-  *ierr = BndFlatGN(*GH, stencil, gn);
-  free(gn);
-}
-
-/* ===================================================================== */
-
-/*@@
-   @routine    BndFlatDirVI
-   @date       Sun Jan 21 2001
-   @author     Gabrielle Allen
-   @desc
-               Apply flat boundary conditions by variable index
-               in given direction
-   @enddesc
-   @calls      ApplyBndFlat
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil_size
-   @vdesc      stencil size in this direction
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        dir
-   @vdesc      direction to apply boundaries
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        vi
-   @vdesc      index of variable to apply boundaries to
-   @vtype      int
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine ApplyBndFlat <BR>
-               -1 if invalid variable index was given
-   @endreturndesc
-@@*/
-int BndFlatDirVI(const cGH *GH, int stencil_size, int dir, int vi) {
-  int retval;
-
-  if (vi >= 0 && vi < CCTK_NumVars()) {
-    retval = ApplyBndFlat(GH, stencil_size, NULL, dir, vi, 1);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid variable index %d in BndFlatDirVI", vi);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatDirVI)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, const int *vi) {
-  *ierr = BndFlatDirVI(*GH, *stencil_size, *dir, *vi);
-}
-
-/*@@
-   @routine    BndFlatVI
-   @date       Thu Mar  2 11:11:40 2000
-   @author     Gerd Lanfermann
-   @desc
-               Apply flat boundary conditions by variable index
-   @enddesc
-   @calls      ApplyBndFlat
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil
-   @vdesc      stencil width
-   @vtype      int [ dimension of variable ]
-   @vio        in
-   @endvar
-   @var        vi
-   @vdesc      index of variable to apply boundaries to
-   @vtype      int
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine ApplyBndFlat <BR>
-               -1 if invalid variable index was given
-   @endreturndesc
-@@*/
-int BndFlatVI(const cGH *GH, const int *stencil, int vi) {
-  int retval;
-
-  if (vi >= 0 && vi < CCTK_NumVars()) {
-    retval = OldApplyBndFlat(GH, -1, stencil, 0, vi, 1);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid variable index %d in BndFlatVI", vi);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatVI)(int *ierr, const cGH **GH,
-                                      const int *stencil, const int *vi) {
-  *ierr = BndFlatVI(*GH, stencil, *vi);
-}
-
-/* ======================================================================= */
-
-/*@@
-   @routine    BndFlatDirVN
-   @date       Sun Jan 21 2001
-   @author     Gabrielle Allen
-   @desc
-               Apply flat boundary conditions by variable name
-               in given direction
-   @enddesc
-   @calls      BndFlatDirVI
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil_size
-   @vdesc      stencil size in this direction
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        dir
-   @vdesc      direction to apply boundaries
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        vn
-   @vdesc      name of variable to apply boundaries to
-   @vtype      const char *
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine BndFlatDirVI <BR>
-               -1 if invalid variable name was given
-   @endreturndesc
-@@*/
-int BndFlatDirVN(const cGH *GH, int stencil_size, int dir, const char *vn) {
-  int vi, retval;
-
-  vi = CCTK_VarIndex(vn);
-  if (vi >= 0) {
-    retval = BndFlatDirVI(GH, stencil_size, dir, vi);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid variable name '%s' in BndFlatDirVN", vn);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatDirVN)(int *ierr, const cGH **GH,
-                                         const int *stencil_size,
-                                         const int *dir, ONE_FORTSTRING_ARG) {
-  ONE_FORTSTRING_CREATE(vn)
-  *ierr = BndFlatDirVN(*GH, *stencil_size, *dir, vn);
-  free(vn);
-}
-
-/*@@
-   @routine    BndFlatVN
-   @date       Thu Mar  2 11:11:40 2000
-   @author     Gerd Lanfermann
-   @desc
-               Apply flat boundary conditions by variable name
-   @enddesc
-   @calls      BndFlatVI
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil
-   @vdesc      stencil width
-   @vtype      int [ dimension of variable ]
-   @vio        in
-   @endvar
-   @var        vn
-   @vdesc      name of variable to apply boundaries to
-   @vtype      const char *
-   @vio        in
-   @endvar
-
-   @returntype int
-   @returndesc
-               return code of @seeroutine BndFlatVI <BR>
-               -1 if invalid variable name was given
-   @endreturndesc
-@@*/
-int BndFlatVN(const cGH *GH, const int *stencil, const char *vn) {
-  int vi, retval;
-
-  vi = CCTK_VarIndex(vn);
-  if (vi >= 0) {
-    retval = BndFlatVI(GH, stencil, vi);
-  } else {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Invalid variable name '%s' in BndFlatVN", vn);
-    retval = -1;
-  }
-
-  return (retval);
-}
-
-void CCTK_FCALL CCTK_FNAME(BndFlatVN)(int *ierr, const cGH **GH,
-                                      const int *stencil, ONE_FORTSTRING_ARG) {
-  ONE_FORTSTRING_CREATE(vn)
-  *ierr = BndFlatVN(*GH, stencil, vn);
-  free(vn);
 }
 
 /********************************************************************
@@ -785,7 +302,7 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
   CCTK_INT symbnd[2 * MAXDIM];
   CCTK_INT is_physical[2 * MAXDIM];
   CCTK_INT ierr;
-
+  
   /* get the group index of the variables */
   gindex = CCTK_GroupIndexFromVarI(first_var);
 
@@ -842,7 +359,7 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
   }
 
   /* sanity check on width of boundary,  */
-  BndSanityCheckWidths(GH, first_var, gdim, widths, "Flat");
+//  BndSanityCheckWidths2(GH, first_var, gdim, widths, "Flat");
 
   /* now loop over all variables */
   for (var = first_var; var < first_var + num_vars; var++) {
@@ -851,6 +368,7 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
        + boundary is an outer boundary
        + have enough grid points
     */
+    
     for (i = 0; i < 2 * gdim; i++) {
       doBC[i] = is_physical[i];
     }
@@ -918,86 +436,4 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
   }
 
   return (0);
-}
-
-/*@@
-   @routine    OldApplyBndFlat
-   @date       5 May 2003
-   @author     David Rideout
-   @desc
-               The new boundary API expects a 2d-element array for the
-               boundary_widths (d=dimension of grid variable), while
-               the old API expects a d-element array.  This function
-               converts the old array to the new format.
-   @enddesc
-
-   @var        GH
-   @vdesc      Pointer to CCTK grid hierarchy
-   @vtype      const cGH *
-   @vio        in
-   @endvar
-   @var        stencil_dir
-   @vdesc      stencil width in direction dir
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        stencil_alldirs
-   @vdesc      stencil widths for all directions
-   @vtype      int [ dimension of variable(s) ]
-   @vio        in
-   @endvar
-   @var        dir
-   @vdesc      direction to set boundaries (0 for setting all directions)
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        first_var
-   @vdesc      index of first variable to apply boundaries to
-   @vtype      int
-   @vio        in
-   @endvar
-   @var        num_vars
-   @vdesc      number of variables
-   @vtype      int
-   @vio        in
-   @endvar
-
-   @calls      CCTK_GroupIndexFromVarI
-               CCTK_GroupDimI
-               ApplyBndFlat
-   @history
-   @returntype int
-   @returndesc
-               returncode from @seeroutine ApplyBndFlat
-   @endreturndesc
-@@*/
-
-int OldApplyBndFlat(const cGH *GH, int stencil_dir, const int *stencil_alldirs,
-                    int dir, int first_var, int num_vars) {
-  int dim, i, retval;
-  CCTK_INT *boundary_widths;
-  static int warned;
-
-  /* Convert stencil_alldirs to new format */
-  dim = CCTK_GroupDimFromVarI(first_var);
-  boundary_widths = malloc(2 * dim * sizeof(CCTK_INT));
-  for (i = 0; i < 2 * dim; ++i) {
-    boundary_widths[i] = stencil_alldirs[i / 2];
-  }
-
-  /* Bug people for using the old interface */
-  if (!warned) {
-    CCTK_VWarn(2, __LINE__, __FILE__, CCTK_THORNSTRING,
-               "Copied older d-element array of boundary widths into the "
-               "newer 2d-element format.  Please use the new boundary "
-               "interface to avoid this.");
-    warned = 1;
-  }
-
-  /* Call ApplyBnd... with new boundary width array */
-  retval =
-      ApplyBndFlat(GH, stencil_dir, boundary_widths, dir, first_var, num_vars);
-
-  free(boundary_widths);
-  return retval;
 }

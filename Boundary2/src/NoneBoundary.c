@@ -23,11 +23,7 @@
 @@*/
 
 #include "cctk.h"
-#include "Boundary.h"
-
-/* the rcs ID and its dummy function to use it */
-static const char *rcsid = "$Header$";
-CCTK_FILEVERSION(CactusBase_Boundary_NoneBoundary_c);
+#include "Boundary2.h"
 
 /********************************************************************
  ********************    External Routines   ************************
@@ -80,7 +76,7 @@ CCTK_FILEVERSION(CactusBase_Boundary_NoneBoundary_c);
    @endreturndesc
 @@*/
 
-void BndNone(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
+void Bndry_None(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
                  CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *table_handles) {
 #ifdef DEBUG
   printf("BndNone(): got passed GH=%p, num_vars=%d, var_indices[0]=%d, "
