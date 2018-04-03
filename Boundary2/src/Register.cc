@@ -1,13 +1,11 @@
 #include "cctk.h"
 #include "cctk_Arguments.h"
-#include "cctk_Arguments_Boundary2.h"
 #include "cctk_Parameters.h"
 #include <algorithm>
 #include "Boundary2.h"
 
 void Boundary2_RegisterBCs(CCTK_ARGUMENTS)
 {
-  DECLARE_CCTK_ARGUMENTS_Boundary2_RegisterBCs
   DECLARE_CCTK_PARAMETERS
 
   int err = 0;
