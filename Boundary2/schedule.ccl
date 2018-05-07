@@ -6,7 +6,7 @@ schedule Boundary2_Check at CCTK_PARAMCHECK
   LANG: C
 } "Check dimension of grid variables"
 
-schedule Boundary2_RegisterBCs in Boundary2_Registration
+schedule Boundary2_RegisterBCs in PreSync_Registration
 {
   LANG: C
   OPTIONS: global
