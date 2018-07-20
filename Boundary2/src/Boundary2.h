@@ -22,39 +22,39 @@ void BndSanityCheckWidths2(const cGH *GH, CCTK_INT varindex, CCTK_INT dim,
                           const CCTK_INT *boundary_widths, const char *bcname);
 
 /* prototype for routine registered as providing 'None' boundary condition */
-void Bndry_None(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_None(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                  CCTK_INT *faces, CCTK_INT *widths,
                  CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Scalar' boundary condition */
-void Bndry_Scalar(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_Scalar(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                    CCTK_INT *faces, CCTK_INT *widths,
                    CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Copy' boundary condition */
-void Bndry_Copy(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_Copy(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                  CCTK_INT *faces, CCTK_INT *widths,
                  CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Static' boundary condition */
-void Bndry_Static(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_Static(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                    CCTK_INT *faces, CCTK_INT *widths,
                    CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Radiative' boundary conditions */
-void Bndry_Radiative(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_Radiative(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                       CCTK_INT *faces, CCTK_INT *widths,
                       CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Robin' boundary condition */
-void Bndry_Robin(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_Robin(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
                   CCTK_INT *faces, CCTK_INT *widths,
                   CCTK_INT *table_handles);
 
 /* prototype for routine registered as providing 'Flat' boundary condition */
-void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
-                 CCTK_INT *faces, CCTK_INT *widths,
-                 CCTK_INT *table_handles);
+CCTK_INT Bndry_Flat(const cGH *cctkGH, const CCTK_INT num_vars, const CCTK_INT *var_indices,
+                 const CCTK_INT *faces, const CCTK_INT *widths,
+                 const CCTK_INT *table_handles);
 
 #ifdef __cplusplus
 }

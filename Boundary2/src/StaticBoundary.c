@@ -19,7 +19,8 @@
 #include "Boundary2.h"
 
 static int ApplyBndStatic(const cGH *GH, CCTK_INT stencil_dir,
-                          const CCTK_INT *stencil_alldirs, int dir,
+                          const CCTK_INT *stencil_alldirs,
+                          int dir, CCTK_INT faces,
                           int first_var, int num_vars);
 
 /********************************************************************
@@ -72,9 +73,9 @@ static int ApplyBndStatic(const cGH *GH, CCTK_INT stencil_dir,
                -22 wrong size boundary width array in table
    @endreturndesc
 @@*/
-void Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
+CCTK_INT Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, err, gdim, max_gdim;
+  int i, j, k, gi, err, gdim, max_gdim, retval;
 
   /* variables to pass to ApplyBndStatic */
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
@@ -86,6 +87,7 @@ void Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       (const void *)GH, num_vars, vars[0], tables[0]);
 #endif
 
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -134,13 +136,13 @@ void Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_FullName(vars[i]));
-        return; //-21
+        return -21;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_FullName(vars[i]), err, 2 * gdim);
-        return; //-22
+        return -22;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
@@ -149,19 +151,19 @@ void Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndStatic(GH,0, width_alldirs, dir, vars[i]
-                                    , j)) < 0) {
+    if ((retval = ApplyBndStatic(GH, 0, width_alldirs, dir, faces[i], vars[i],
+                                 j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndStatic() returned %d", err);
+                 "ApplyBndStatic() returned %d", retval);
     }
   }
 #ifdef DEBUG
-  printf("BndStatic(): returning %d\n", err);
+  printf("BndStatic(): returning %d\n", retval);
 #endif
 
   free(width_alldirs);
 
-  return;
+  return retval;
 }
 
 /********************************************************************
@@ -283,8 +285,8 @@ void Bndry_Static(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
    @endreturndesc
 @@*/
 static int ApplyBndStatic(const cGH *GH, CCTK_INT width_dir,
-                          const CCTK_INT *in_widths, int dir, int first_var,
-                          int num_vars) {
+                          const CCTK_INT *in_widths, int dir, CCTK_INT faces,
+                          int first_var, int num_vars) {
   int ierr;
   int i, j, k;
   int timelvl_to, timelvl_from;
@@ -373,7 +375,7 @@ static int ApplyBndStatic(const cGH *GH, CCTK_INT width_dir,
        + have enough grid points
     */
     for (i = 0; i < 2 * gdim; i++) {
-      doBC[i] = is_physical[i];
+      doBC[i] = is_physical[i] && (faces == CCTK_ALL_FACES || (faces & (1<<i)));
     }
     for (i = 0; i < gdim; i++) {
       ash[i] = GH->cctk_ash[i];

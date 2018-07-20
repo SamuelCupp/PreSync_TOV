@@ -136,9 +136,9 @@ static int ApplyBndRadiative(const cGH *GH, int stencil_dir,
    @endreturndesc
 @@*/
 
-void Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
+CCTK_INT Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                       CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, gdim, max_gdim, err;
+  int i, j, k, gi, gdim, max_gdim, err, retval;
 
   /* variables to pass to ApplyBndRadiative */
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
@@ -233,13 +233,13 @@ void Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return; //-21
+        return -21;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return; //-22
+        return -22;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
@@ -248,18 +248,18 @@ void Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndRadiative(GH, 0, width_alldirs, dir, limit, speed,
+    if ((retval = ApplyBndRadiative(GH, 0, width_alldirs, dir, limit, speed,
                                     vars[i], prev_time_level, j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndRadiative() returned %d", err);
+                 "ApplyBndRadiative() returned %d", retval);
     }
   }
 #ifdef DEBUG
-  printf("BndRadiative(): returning %d\n", err);
+  printf("BndRadiative(): returning %d\n", retval);
 #endif
   free(width_alldirs);
 
-  return;
+  return retval;
 }
 
 /********************************************************************

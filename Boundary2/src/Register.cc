@@ -8,83 +8,82 @@ void Boundary2_RegisterBCs(CCTK_ARGUMENTS)
 {
   DECLARE_CCTK_PARAMETERS
 
-  int err = 0;
   CCTK_INFO("Registering Boundary Conditions");
 
   if (register_scalar) {
-    RegisterPhysicalBC(cctkGH, Bndry_Scalar, "scalar", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndScalar, "scalar", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Scalar, "scalar");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Scalar\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_flat) {
-    RegisterPhysicalBC(cctkGH, Bndry_Flat, "flat", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndFlat, "flat", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Flat, "flat");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Flat\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_radiation) {
-    RegisterPhysicalBC(cctkGH, Bndry_Radiative, "radiation", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndRadiative, "radiation", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Radiative, "radiation");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Radiation\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_copy) {
-    RegisterPhysicalBC(cctkGH, Bndry_Copy, "copy", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndCopy, "copy", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Copy, "copy");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Copy\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_robin) {
-    RegisterPhysicalBC(cctkGH, Bndry_Robin, "robin", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndRobin, "robin", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Robin, "robin");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Robin\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_static) {
-    RegisterPhysicalBC(cctkGH, Bndry_Static, "static", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndStatic, "static", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_Static, "static");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"Static\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 
   if (register_none) {
-    RegisterPhysicalBC(cctkGH, Bndry_None, "none", 1);
-/*    err = Carpet_RegisterPhysicalBC(cctkGH, BndNone, "none", 1);
+    int err = 0;
+    err = Boundary_RegisterPhysicalBC(cctkGH, (boundary_function)Bndry_None, "none");
     if (err) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                  "Error %d when registering routine to handle \"None\" "
                  "boundary condition",
                  err);
     }
-*/  }
+  }
 }

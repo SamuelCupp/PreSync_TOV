@@ -2,23 +2,46 @@
 # $Header$
 
 implements: boundary2
+inherits: Driver
 
 INCLUDES HEADER: Boundary2.h in Boundary2.h
 
+CCTK_INT FUNCTION Boundary_RegisterPhysicalBC(CCTK_POINTER_TO_CONST IN GH, \
+  CCTK_INT IN CCTK_FPOINTER function_pointer(CCTK_POINTER_TO_CONST IN GH, \
+                                             CCTK_INT IN num_vars, \
+                                             CCTK_INT ARRAY IN var_indices, \
+                                             CCTK_INT ARRAY IN faces, \
+                                             CCTK_INT ARRAY IN boundary_widths, \
+                                             CCTK_INT ARRAY IN table_handles),\
+  CCTK_STRING IN bc_name)
+PROVIDES FUNCTION Boundary_RegisterPhysicalBC WITH
+  Bdry2_Boundary_RegisterPhysicalBC LANGUAGE C
 
-#CCTK_INT FUNCTION
-#    Carpet_RegisterPhysicalBC(
-#        CCTK_POINTER_TO_CONST IN cctkGH,
-#        CCTK_INT IN CCTK_FPOINTER func(
-#            CCTK_POINTER_TO_CONST IN cctkGH,
-#            CCTK_INT IN num_vars,
-#            CCTK_INT IN var_indices,
-#            CCTK_INT IN faces,
-#            CCTK_INT IN width,
-#            CCTK_INT IN table_handle),
-#        CCTK_INT IN before,
-#        CCTK_STRING IN bc_name)
-#USES FUNCTION Carpet_RegisterPhysicalBC
+CCTK_INT FUNCTION Boundary_RegisterSymmetryBC(CCTK_POINTER_TO_CONST IN GH, \
+  CCTK_INT IN CCTK_FPOINTER function_pointer(CCTK_POINTER_TO_CONST IN GH, \
+                                             CCTK_INT IN num_vars, \
+                                             CCTK_INT ARRAY IN var_indices, \
+                                             CCTK_INT ARRAY IN faces, \
+                                             CCTK_INT ARRAY IN boundary_widths, \
+                                             CCTK_INT ARRAY IN table_handles),\
+  CCTK_INT IN table_handles, \
+  CCTK_INT IN faces, \
+  CCTK_INT IN boundary_widths, \
+  CCTK_STRING IN bc_name)
+PROVIDES FUNCTION Boundary_RegisterSymmetryBC WITH
+  Bdry2_Boundary_RegisterSymmetryBC LANGUAGE C
+
+CCTK_INT FUNCTION Boundary_SelectVarForBC(CCTK_POINTER_TO_CONST IN GH,
+  CCTK_INT IN faces, CCTK_INT IN boundary_width, CCTK_INT IN table_handle,
+  CCTK_STRING IN var_name, CCTK_STRING IN bc_name)
+PROVIDES FUNCTION Boundary_SelectVarForBC WITH Bdry2_Boundary_SelectVarForBC
+  LANGUAGE C
+
+CCTK_INT FUNCTION Boundary_SelectGroupForBC(CCTK_POINTER_TO_CONST IN GH,
+  CCTK_INT IN faces, CCTK_INT IN boundary_width, CCTK_INT IN table_handle,
+  CCTK_STRING IN group_name, CCTK_STRING IN bc_name)
+PROVIDES FUNCTION Boundary_SelectGroupForBC WITH
+  Bdry2_Boundary_SelectGroupForBC LANGUAGE C
 
 CCTK_INT FUNCTION \
     SymmetryTableHandleForGrid (CCTK_POINTER_TO_CONST IN cctkGH)

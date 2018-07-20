@@ -80,9 +80,9 @@ static int ApplyBndRobin(const cGH *GH, const CCTK_INT *stencil, CCTK_REAL finf,
    @endreturndesc
 @@*/
 
-void Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
+CCTK_INT Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                   CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, err, gdim, max_gdim;
+  int i, j, k, gi, err, gdim, max_gdim, retval;
 
   /* variables to pass to ApplyBndRobin */
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
@@ -95,6 +95,7 @@ void Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       (const void *)GH, num_vars, vars[0], tables[0]);
 #endif
 
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -162,13 +163,13 @@ void Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return; //-21
+        return -21;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return; //-22
+        return -22;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
@@ -177,18 +178,18 @@ void Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndRobin(GH, width_alldirs, finf, npow, vars[i], j)) <
+    if ((retval = ApplyBndRobin(GH, width_alldirs, finf, npow, vars[i], j)) <
         0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndRobin() returned %d", err);
+                 "ApplyBndRobin() returned %d", retval);
     }
   }
 #ifdef DEBUG
-  printf("BndRobin(): returning %d\n", err);
+  printf("BndRobin(): returning %d\n", retval);
 #endif
   free(width_alldirs);
 
-  return;
+  return retval;
 }
 
 /********************************************************************

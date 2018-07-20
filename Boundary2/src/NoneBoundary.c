@@ -76,7 +76,7 @@
    @endreturndesc
 @@*/
 
-void Bndry_None(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
+CCTK_INT Bndry_None(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
                  CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *table_handles) {
 #ifdef DEBUG
   printf("BndNone(): got passed GH=%p, num_vars=%d, var_indices[0]=%d, "
@@ -92,5 +92,5 @@ void Bndry_None(const cGH *GH, CCTK_INT num_vars, CCTK_INT *var_indices,
   widths = widths;
   table_handles = table_handles;
 
-  return;
+  return 0;
 }

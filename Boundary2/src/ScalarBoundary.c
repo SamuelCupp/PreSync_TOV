@@ -81,15 +81,16 @@ static int ApplyBndScalar(const cGH *GH,
                -22 wrong size boundary width array in table
    @endreturndesc
 @@*/
-void Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
+CCTK_INT Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *tables) {
-  int i, j, k, gi, gdim, max_gdim, err;
+  int i, j, k, gi, gdim, max_gdim, err, retval;
 
   /* variables to pass to ApplyBndScalar */
   CCTK_INT *width_alldirs; /* width of stencil in all directions */
   int dir;                 /* direction in which to apply bc */
   CCTK_REAL scalar;
 
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -154,13 +155,13 @@ void Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
                    "Error %d when reading boundary width array from table "
                    "for %s",
                    err, CCTK_VarName(vars[i]));
-        return; //-21
+        return -21;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
                    CCTK_VarName(vars[i]), err, 2 * gdim);
-        return; //-22
+        return -22;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
@@ -169,10 +170,10 @@ void Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndScalar(GH, 0, width_alldirs, dir, faces[i], scalar,
+    if ((retval = ApplyBndScalar(GH, 0, width_alldirs, dir, faces[i], scalar,
                                  vars[i], j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndScalar() returned %d", err);
+                 "ApplyBndScalar() returned %d", retval);
     }
   }
 #ifdef DEBUG
@@ -181,7 +182,7 @@ void Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
 
   free(width_alldirs);
 
-  return;
+  return retval;
 }
 
 /********************************************************************

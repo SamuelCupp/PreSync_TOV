@@ -26,8 +26,9 @@
 #include "Boundary2.h"
 
 static int ApplyBndFlat(const cGH *GH, CCTK_INT stencil_dir,
-                        const CCTK_INT *stencil_alldirs, int dir, int first_var,
-                        int num_vars);
+                        const CCTK_INT *stencil_alldirs,
+                        int dir, CCTK_INT faces,
+                        int first_var, int num_vars);
 
 /********************************************************************
  ********************    External Routines   ************************
@@ -80,14 +81,15 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT stencil_dir,
                -22 wrong size boundary width array in table
    @endreturndesc
 @@*/
-void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
-                 CCTK_INT *faces, CCTK_INT *widths, CCTK_INT *table_handles) {
+CCTK_INT Bndry_Flat(const cGH *GH, const CCTK_INT num_vars, const CCTK_INT *vars,
+                 const CCTK_INT *faces, const CCTK_INT *widths, const CCTK_INT *tables) {
   int i, j, k, gi, gdim, max_gdim, err, retval;
-  
+
   /* variables to pass to ApplyBndFlat */
   CCTK_INT *width_alldirs; /* width of boundary in all directions */
   int dir;                 /* direction in which to apply bc */
 
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -99,22 +101,22 @@ void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
        can do is find variables of the same group which are selected
        for identical bcs.  If all GFs had the same staggering then we
        could group many GFs together. */
-    gi = CCTK_GroupIndexFromVarI(var_indices[i]);
-    while (i + j < num_vars && var_indices[i + j] == var_indices[i] + j &&
-           CCTK_GroupIndexFromVarI(var_indices[i + j]) == gi &&
-           table_handles[i + j] == table_handles[i] && faces[i + j] == faces[i] &&
+    gi = CCTK_GroupIndexFromVarI(vars[i]);
+    while (i + j < num_vars && vars[i + j] == vars[i] + j &&
+           CCTK_GroupIndexFromVarI(vars[i + j]) == gi &&
+           tables[i + j] == tables[i] && faces[i + j] == faces[i] &&
            widths[i + j] == widths[i]) {
       ++j;
     }
 
     /* Check to see if faces specification is valid */
-    if (faces[i] != CCTK_ALL_FACES) {
-      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "Faces specification %d for Flat boundary conditions on "
-                 "%s is not implemented yet.  "
-                 "Applying Flat bcs to all (external) faces.",
-                 (int)faces[i], CCTK_VarName(var_indices[i]));
-    }
+//    if (faces[i] != CCTK_ALL_FACES) {
+//      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
+//                 "Faces specification %d for Flat boundary conditions on "
+//                 "%s is not implemented yet.  "
+//                 "Applying Flat bcs to all (external) faces.",
+//                 (int)faces[i], CCTK_VarName(vars[i]));
+//    }
     dir = 0; /* apply bc to all faces */
 
     /* Determine boundary width on all faces */
@@ -129,20 +131,20 @@ void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
     /* fill it with values, either from table or the boundary_width
        parameter */
     if (widths[i] < 0) {
-      err = Util_TableGetIntArray(table_handles[i], gdim, width_alldirs,
+      err = Util_TableGetIntArray(tables[i], gdim, width_alldirs,
                                   "BOUNDARY_WIDTH");
       if (err < 0) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Error %d when reading boundary width array from table "
                    "for %s",
-                   err, CCTK_VarName(var_indices[i]));
-        return;
+                   err, CCTK_VarName(vars[i]));
+        return -21;
       } else if (err != 2 * gdim) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
                    "Boundary width array for %s has %d elements, but %d "
                    "expected",
-                   CCTK_VarName(var_indices[i]), err, 2 * gdim);
-        return;
+                   CCTK_VarName(vars[i]), err, 2 * gdim);
+        return -22;
       }
     } else {
       for (k = 0; k < 2 * gdim; ++k) {
@@ -151,19 +153,19 @@ void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
     }
 
     /* Apply the boundary condition */
-    if ((err = ApplyBndFlat(cctkGH,0, width_alldirs, dir, var_indices[i]
-                                    , j)) < 0) {
+    if ((retval = ApplyBndFlat(GH, 0, width_alldirs, dir, faces[i], vars[i],
+                               j)) < 0) {
       CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "ApplyBndScalar() returned %d", err);
+                 "ApplyBndFlat() returned %d", retval);
     }
   }
 #ifdef DEBUG
-  printf("BndFlat(): returning %d\n", err);
+  printf("BndFlat(): returning %d\n", retval);
 #endif
 
   free(width_alldirs);
 
-  return;
+  return retval;
 }
 
 /********************************************************************
@@ -292,8 +294,9 @@ void Bndry_Flat(const cGH *cctkGH, CCTK_INT num_vars, CCTK_INT *var_indices,
    @endreturndesc
 @@*/
 static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
-                        const CCTK_INT *in_widths, int dir, int first_var,
-                        int num_vars) {
+                        const CCTK_INT *in_widths,
+                        int dir, CCTK_INT faces,
+                        int first_var, int num_vars) {
   int i, j, k;
   int var, vtypesize, gindex, gdim, timelvl;
   int doBC[2 * MAXDIM], ash[MAXDIM], lsh[MAXDIM];
@@ -302,7 +305,7 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
   CCTK_INT symbnd[2 * MAXDIM];
   CCTK_INT is_physical[2 * MAXDIM];
   CCTK_INT ierr;
-  
+
   /* get the group index of the variables */
   gindex = CCTK_GroupIndexFromVarI(first_var);
 
@@ -359,7 +362,7 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
   }
 
   /* sanity check on width of boundary,  */
-//  BndSanityCheckWidths2(GH, first_var, gdim, widths, "Flat");
+  BndSanityCheckWidths2(GH, first_var, gdim, widths, "Flat");
 
   /* now loop over all variables */
   for (var = first_var; var < first_var + num_vars; var++) {
@@ -368,9 +371,8 @@ static int ApplyBndFlat(const cGH *GH, CCTK_INT width_dir,
        + boundary is an outer boundary
        + have enough grid points
     */
-    
     for (i = 0; i < 2 * gdim; i++) {
-      doBC[i] = is_physical[i];
+      doBC[i] = is_physical[i] && (faces == CCTK_ALL_FACES || (faces & (1<<i)));
     }
     for (i = 0; i < gdim; i++) {
       ash[i] = GH->cctk_ash[i];

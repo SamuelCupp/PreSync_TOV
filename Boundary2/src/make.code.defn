@@ -10,4 +10,5 @@ SRCS = ScalarBoundary.c\
        RobinBoundary.c\
        NoneBoundary.c\
        Register.cc\
-       Check.c
+       Check.c\
+       PreSync.cc
