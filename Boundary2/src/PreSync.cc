@@ -103,7 +103,6 @@ void Boundary_SelectVarForBCI(
   b.width = width;
   b.table_handle = table_handle;
   b.bc_name = bc_name;
-  std::cout << "Select " << bc_name << "with width " << width << std::endl;
   bv.push_back(b);
 }
 
