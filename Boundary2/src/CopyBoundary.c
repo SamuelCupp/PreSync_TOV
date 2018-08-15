@@ -21,8 +21,6 @@
 #include "util_ErrorCodes.h"
 #include "cctk_FortranString.h"
 
-#include "Boundary.h"
-
 static int ApplyBndCopy(const cGH *GH, CCTK_INT stencil_dir,
                         const CCTK_INT *stencil_alldirs,
                         int dir, CCTK_INT faces,
