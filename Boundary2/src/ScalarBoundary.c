@@ -110,14 +110,6 @@ CCTK_INT Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
       ++j;
     }
 
-    /* Check to see if faces specification is valid */
-    if (faces[i] != CCTK_ALL_FACES) {
-      CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
-                 "Faces specification %d for Scalar boundary conditions on "
-                 "%s is not implemented yet.  "
-                 "Applying Scalar bcs to all (external) faces.",
-                 (int)faces[i], CCTK_VarName(vars[i]));
-    }
     dir = 0; /* apply bc to all faces */
 
     /* Set up default arguments for ApplyBndScalar */
@@ -148,7 +140,7 @@ CCTK_INT Bndry_Scalar(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     /* fill it with values, either from table or the boundary_width
        parameter */
     if (widths[i] < 0) {
-      err = Util_TableGetIntArray(tables[i], gdim, width_alldirs,
+      err = Util_TableGetIntArray(tables[i], 2 * gdim, width_alldirs,
                                   "BOUNDARY_WIDTH");
       if (err < 0) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,

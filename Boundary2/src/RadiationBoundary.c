@@ -160,6 +160,7 @@ CCTK_INT Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
 #endif
 
   /* Initialize variables */
+  retval = 0;
   width_alldirs = NULL;
   max_gdim = 0;
 
@@ -226,7 +227,7 @@ CCTK_INT Bndry_Radiative(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     /* fill it with values, either from table or the boundary_width
        parameter */
     if (widths[i] < 0) {
-      err = Util_TableGetIntArray(tables[i], gdim, width_alldirs,
+      err = Util_TableGetIntArray(tables[i], 2 * gdim, width_alldirs,
                                   "BOUNDARY_WIDTH");
       if (err < 0) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
@@ -576,6 +577,7 @@ static int ApplyBndRadiative(const cGH *GH, int width_dir,
   int var_to, var_from;
   int timelvl_from;
   char coord_system_name[10];
+  int written;
   CCTK_REAL dxyz[MAXDIM], rho[MAXDIM];
   const CCTK_REAL *xyzr[MAXDIM + 1];
   CCTK_INT doBC[2 * MAXDIM], widths[2 * MAXDIM], offset[MAXDIM];
@@ -635,7 +637,12 @@ static int ApplyBndRadiative(const cGH *GH, int width_dir,
   dtvvar0 = dtv * var0;
   dtvvar0H = dtvvar0;
 
-  sprintf(coord_system_name, "cart%dd", gdim);
+  written = snprintf(coord_system_name, sizeof(coord_system_name), "cart%dd",
+                     gdim);
+  if (written >= sizeof(coord_system_name)) {
+    CCTK_VWARN(1, "Buffer too small for gdim=%d", gdim);
+    return (-6);
+  }
   for (i = 0; i < gdim; i++) {
     /* Radiative boundaries need the underlying Cartesian coordinates */
     indx = CCTK_CoordIndex(i + 1, NULL, coord_system_name);
@@ -656,7 +663,12 @@ static int ApplyBndRadiative(const cGH *GH, int width_dir,
   }
 
   /* Append r grid variable to end of xyzr[] array */
-  sprintf(coord_system_name, "spher%dd", gdim);
+  written = snprintf(coord_system_name, sizeof(coord_system_name), "spher%dd",
+                     gdim);
+  if (written >= sizeof(coord_system_name)) {
+    CCTK_VWARN(1, "Buffer too small for gdim=%d", gdim);
+    return (-6);
+  }
   indx = CCTK_CoordIndex(-1, "r", coord_system_name);
   if (indx < 0) {
     CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,

@@ -156,7 +156,7 @@ CCTK_INT Bndry_Robin(const cGH *GH, CCTK_INT num_vars, CCTK_INT *vars,
     /* fill it with values, either from table or the boundary_width
        parameter */
     if (widths[i] < 0) {
-      err = Util_TableGetIntArray(tables[i], gdim, width_alldirs,
+      err = Util_TableGetIntArray(tables[i], 2 * gdim, width_alldirs,
                                   "BOUNDARY_WIDTH");
       if (err < 0) {
         CCTK_VWarn(1, __LINE__, __FILE__, CCTK_THORNSTRING,
